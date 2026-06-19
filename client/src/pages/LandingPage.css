@@ -1,0 +1,279 @@
+body {
+
+  margin: 0;
+
+  padding: 0;
+
+  background: #1f140d;
+
+  font-family:
+    'Playfair Display',
+    serif;
+}
+
+.landing-page {
+
+  min-height: 100vh;
+
+  color: #f8e7c7;
+
+  background:
+    linear-gradient(
+      135deg,
+      #2b1d0e,
+      #4a3421,
+      #1e140d
+    );
+}
+
+/* Navbar */
+
+.navbar {
+
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  align-items: center;
+
+  padding:
+    25px 60px;
+}
+
+.logo {
+
+  font-size: 28px;
+
+  font-weight: bold;
+
+  color: #f5d28c;
+}
+
+.nav-links {
+
+  display: flex;
+
+  gap: 15px;
+}
+
+.nav-button {
+
+  text-decoration: none;
+
+  padding:
+    12px 22px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(255,248,220,0.08);
+
+  color: #f8e7c7;
+
+  transition: 0.3s ease;
+
+  border:
+    1px solid
+    rgba(255,215,150,0.15);
+}
+
+.nav-button:hover {
+
+  background:
+    rgba(255,248,220,0.15);
+}
+
+.signup {
+
+  background: #8b5e34;
+}
+
+/* Intro */
+
+.intro-section {
+
+  position: relative;
+
+  overflow: hidden;
+
+  text-align: center;
+
+  padding:
+    140px 20px
+    140px;
+
+  background-image:
+    linear-gradient(
+      rgba(31,20,13,0.72),
+      rgba(31,20,13,0.72)
+    ),
+    url("../assets/reading-shadow.jpg");
+
+  background-size: cover;
+
+  background-position: center;
+
+  background-repeat: no-repeat;
+}
+
+.intro-section h1 {
+
+  font-size: 72px;
+
+  color: #f5d28c;
+
+  margin-bottom: 20px;
+}
+
+.intro-section p {
+
+  font-size: 22px;
+
+  max-width: 700px;
+
+  margin:
+    0 auto;
+
+  line-height: 1.7;
+
+  color:
+    rgba(248,231,199,0.8);
+}
+
+.enter-button {
+
+  display: inline-block;
+
+  margin-top: 40px;
+
+  text-decoration: none;
+
+  padding:
+    16px 34px;
+
+  border-radius: 14px;
+
+  background: #a47148;
+
+  color: white;
+
+  font-size: 18px;
+
+  transition: 0.3s ease;
+}
+
+.enter-button:hover {
+
+  transform:
+    translateY(-2px);
+}
+
+/* Features */
+
+.features-section {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(280px, 1fr)
+    );
+
+  gap: 30px;
+
+  padding:
+    60px;
+}
+
+.feature-card {
+
+  background:
+    rgba(255,248,220,0.08);
+
+  border:
+    1px solid
+    rgba(255,215,150,0.15);
+
+  border-radius: 24px;
+
+  padding: 35px;
+
+  backdrop-filter:
+    blur(10px);
+
+  box-shadow:
+    0 8px 30px
+    rgba(0,0,0,0.35);
+
+  transition: 0.3s ease;
+}
+
+.feature-card:hover {
+
+  transform:
+    translateY(-5px);
+}
+
+.feature-card h2 {
+
+  color: #f5d28c;
+
+  margin-bottom: 15px;
+}
+
+.feature-card p {
+
+  color:
+    rgba(248,231,199,0.8);
+
+  line-height: 1.7;
+}
+
+/* Quote */
+
+.quote-section {
+
+  text-align: center;
+
+  padding:
+    100px 20px;
+
+  font-size: 34px;
+
+  color: #f5d28c;
+
+  font-style: italic;
+}
+
+/* CTA */
+
+.cta-section {
+
+  text-align: center;
+
+  padding:
+    80px 20px
+    120px;
+}
+
+.cta-section h2 {
+
+  font-size: 48px;
+
+  color: #f5d28c;
+
+  margin-bottom: 40px;
+}
+
+.cta-buttons {
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 20px;
+
+  flex-wrap: wrap;
+}
