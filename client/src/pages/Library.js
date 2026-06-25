@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { supabase } from "../supabase/supabase";
 
 function Library() {
   const navigate = useNavigate();
@@ -35,15 +36,18 @@ function Library() {
 
   /* FETCH BOOKS */
   useEffect(() => {
-    fetch("http://localhost:5000/books")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setBooks(data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const fetchBooks= async()=>{
+      const {data,error}=await supabase
+      .from("books")
+      .select("*");
+    if(error){
+      console.error(error);
+      return;
+    }
+    console.log(data);
+    setBooks(data);
+    };
+    fetchBooks();
   }, []);
 
   return (
