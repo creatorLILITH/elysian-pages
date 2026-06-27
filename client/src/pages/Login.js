@@ -1,11 +1,7 @@
 import { useState } from "react";
-
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
-
+import { Link,useNavigate } from "react-router-dom";
 import AuthCard from "../components/AuthCard";
+import { supabase } from "../supabase"; 
 
 function Login() {
 
@@ -24,54 +20,16 @@ function Login() {
       e.preventDefault();
 
       try {
-
-        const res =
-          await fetch(
-            "http://localhost:5000/login",
-
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body:
-                JSON.stringify({
-                  email,
-                  password,
-                }),
-            }
-          );
-
-        const data =
-          await res.json();
-
-        if (res.ok) {
-
-          localStorage.setItem(
-            "user",
-
-            JSON.stringify(
-              data.user
-            )
-          );
-
-          if (data.user.role==="admin"){
-            navigate("/admin");
-          }
-          else{
-            navigate("/dashboard")
-          };
-
-        } else {
-
-          alert(
-            data.error
-          );
+        const { data,error }=await supabase.auth.signInWithPassword({
+          email,password,
+        });
+        if (error){
+          alert(error.message);
         }
-
+        else{
+          localStorage.setItem("user",JSON.stringify(data.user));
+          navigate("/dashboard");
+        }
       } catch (error) {
 
         console.log(error);
@@ -83,13 +41,10 @@ function Login() {
     };
 
   return (
-
     <AuthCard title="Welcome Back">
-
       <form
         onSubmit={handleLogin}
       >
-
         <input
           type="email"
           placeholder="Email"

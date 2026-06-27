@@ -1,6 +1,7 @@
 import { useState } from "react";
-import {Link,useNavigate,} from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import AuthCard from "../components/AuthCard";
+import { supabase } from "../supabase";
 
 function Signup() {
 
@@ -13,10 +14,7 @@ function Signup() {
   const [password, setPassword] =
     useState("");
 
-  const [
-    confirmPassword,
-    setConfirmPassword,
-  ] = useState("");
+  const [confirmPassword,setConfirmPassword] = useState("");
 
   const navigate =
     useNavigate();
@@ -40,42 +38,21 @@ function Signup() {
 
       try {
 
-        const res =
-          await fetch(
-            "http://localhost:5000/signup",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body:
-                JSON.stringify({
-                  username,
-                  email,
-                  password,
-                }),
-            }
-          );
-
-        const data =
-          await res.json();
-
-        if (res.ok) {
-
-          alert(
-            "Signup successful!"
-          );
-
+        const { error } = await supabase.auth.signUp({
+  email,
+  password,
+  options: {
+    data: {
+      username,
+    },
+  },
+});
+        if (error){
+          alert(error.message);
+        }
+        else{
+          alert("Signup Successful!");
           navigate("/login");
-
-        } else {
-
-          alert(
-            data.error
-          );
         }
 
       } catch (error) {

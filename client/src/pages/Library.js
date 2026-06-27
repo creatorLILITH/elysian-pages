@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "../supabase/supabase";
+import { supabase } from "../supabase";
 
 function Library() {
   const navigate = useNavigate();
@@ -39,7 +39,8 @@ function Library() {
     const fetchBooks= async()=>{
       const {data,error}=await supabase
       .from("books")
-      .select("*");
+      .select("*")
+      .eq("is_archived",false);
     if(error){
       console.error(error);
       return;
