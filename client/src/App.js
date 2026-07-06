@@ -11,7 +11,7 @@ import Library from "./pages/Library";
 import MyLibrary from "./pages/MyLibrary";
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode] = useState(false);
 
   const appStyle = {
     backgroundColor: darkMode ? "#121212" : "#f5f5f5",

@@ -1,6 +1,4 @@
 import "./LandingPage.css";
-import shadowImage from "../assets/reading-shadow.jpg";
-
 import { Link } from "react-router-dom";
 
 function LandingPage() {
