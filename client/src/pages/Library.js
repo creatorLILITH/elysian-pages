@@ -5,34 +5,6 @@ import { supabase } from "../supabase";
 function Library() {
   const navigate = useNavigate();
   const [books, setBooks] = useState([]);
-  const user = JSON.parse(localStorage.getItem("user"));
-  const addToLibrary = async (bookId) => {
-  try {
-
-    const res = await fetch("http://localhost:5000/add-to-library",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          bookId: bookId,
-        }),
-      }
-    );
-
-    const data = await res.json();
-
-    alert(data.message);
-
-  } catch (error) {
-
-    console.log(error);
-    alert("Failed to add book");
-
-  }
-};
 
   /* FETCH BOOKS */
   useEffect(() => {
