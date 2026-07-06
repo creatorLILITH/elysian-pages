@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase";
+import BookCard from "../components/BookCard";
 
 function Library() {
   const navigate = useNavigate();
@@ -91,94 +92,11 @@ function Library() {
 
         ) : (
 
-          books.map((book, index) => (
-
-            <div
-              key={index}
-              style={bookCard}
-            >
-
-              {/* BOOK COVER */}
-              <img
-                src={`http://localhost:5000/${book.cover_url}`}
-                alt={book.title}
-                style={coverStyle}
-              />
-
-              {/* TITLE */}
-              <h2>{book.title}</h2>
-
-              {/* AUTHOR */}
-              <p>{book.author}</p>
-
-              {/* CATEGORY */}
-              <span style={categoryStyle}>
-                {book.category}
-              </span>
-
-              {/* BUTTONS */}
-              <div style={btnContainer}>
-
-                {/* READ */}
-                <button
-                  style={readBtn}
-                  onClick={() =>
-                    navigate("/reader", {
-                      state: { book },
-                    })
-                  }
-                >
-                  Read Now
-                </button>
-
-                {/* ADD TO LIBRARY */}
-                <button
-                  style={saveBtn}
-
-                  onClick={() => {
-
-                    const existingBooks =
-                      JSON.parse(
-                        localStorage.getItem(
-                          "myLibrary"
-                        )
-                      ) || [];
-
-                    /* Prevent duplicates */
-                    const alreadyExists =
-                      existingBooks.find(
-                        (b) =>
-                          b.title === book.title
-                      );
-
-                    if (alreadyExists) {
-
-                      alert(
-                        "Book already added!"
-                      );
-
-                      return;
-                    }
-
-                    existingBooks.push(book);
-
-                    localStorage.setItem(
-                      "myLibrary",
-                      JSON.stringify(existingBooks)
-                    );
-
-                    alert(
-                      "Book added to My Library!"
-                    );
-                  }}
-                >
-                  Add to Library
-                </button>
-
-              </div>
-
-            </div>
-
+          books.map((book) => (
+            <BookCard
+              key={book.id} book={book} onRead={() =>
+                navigate("/reader", { state: { book },})}
+                onAdd={() => addToLibrary(book.id)}/>
           ))
 
         )}
@@ -188,9 +106,7 @@ function Library() {
     </div>
   );
 }
-
 /* ---------------- STYLES ---------------- */
-
 const pageStyle = {
   minHeight: "100vh",
 
