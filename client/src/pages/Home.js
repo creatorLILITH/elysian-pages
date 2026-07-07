@@ -31,7 +31,7 @@ function Home() {
   useEffect(() => {
 
     fetch(
-      "http://https://elysian-pages.onrender.com/books"
+      "https://elysian-pages.onrender.com/books"
     )
       .then((res) =>
         res.json()
@@ -100,7 +100,7 @@ function Home() {
 
         const res =
           await fetch(
-            "http://https://elysian-pages.onrender.com/upload",
+            "https://elysian-pages.onrender.com/upload",
             {
               method: "POST",
               body: formData,

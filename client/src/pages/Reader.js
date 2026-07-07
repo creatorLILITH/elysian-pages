@@ -199,7 +199,7 @@ function Reader() {
     book.fileUrl;
 
   const fileUrl = rawUrl
-    ? `http://https://elysian-pages.onrender.com/${rawUrl.replaceAll("\\", "/")}`
+    ? `https://elysian-pages.onrender.com/${rawUrl.replaceAll("\\", "/")}`
     : "";
 
   const isPDF =

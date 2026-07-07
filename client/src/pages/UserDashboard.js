@@ -81,7 +81,7 @@ function UserDashboard() {
 
               {book.cover_url ? (
                 <img
-                  src={`http://https://elysian-pages.onrender.com/${book.cover_url}`}
+                  src={`https://elysian-pages.onrender.com/${book.cover_url}`}
                   alt={book.title}
                   style={coverStyle}
                 />
@@ -134,7 +134,7 @@ function UserDashboard() {
 
               {book.cover_url ? (
                 <img
-                  src={`http://https://elysian-pages.onrender.com/${book.cover_url}`}
+                  src={`https://elysian-pages.onrender.com/${book.cover_url}`}
                   alt={book.title}
                   style={coverStyle}
                 />
