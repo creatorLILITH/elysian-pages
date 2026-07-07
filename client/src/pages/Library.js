@@ -72,7 +72,7 @@ function Library() {
 
               {/* BOOK COVER */}
               <img
-                src={`http://localhost:5000/${book.cover_url}`}
+                src={`http://https://elysian-pages.onrender.com/${book.cover_url}`}
                 alt={book.title}
                 style={coverStyle}
               />
