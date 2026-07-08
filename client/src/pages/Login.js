@@ -26,10 +26,28 @@ function Login() {
         if (error){
           alert(error.message);
         }
-        else{
-          localStorage.setItem("user",JSON.stringify(data.user));
-          navigate("/dashboard");
-        }
+        else {
+
+  localStorage.setItem("user", JSON.stringify(data.user));
+
+  const { data: profile, error: profileError } = await supabase
+    .from("users")
+    .select("role")
+    .eq("email", data.user.email)
+    .single();
+
+  if (profileError) {
+    console.log(profileError);
+    navigate("/dashboard");
+    return;
+  }
+
+  if (profile.role === "admin") {
+    navigate("/admin");
+  } else {
+    navigate("/dashboard");
+  }
+}
       } catch (error) {
 
         console.log(error);
