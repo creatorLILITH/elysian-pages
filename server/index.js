@@ -193,8 +193,7 @@ app.post("/add-to-library", async(req,res)=>{
 });
 
 //upload-book route
-app.post(
-  "/upload-book",
+app.post("/upload-book",
   upload.fields([
     {name:"book",maxCount:1},
     {name:"cover",maxCount:1},
@@ -226,6 +225,7 @@ app.post(
           "admin",
         ]
       );
+      console.log("LIBRARY BOOK INSERT RESULT:", result.rowCount);
       res.json({
         message:
           "Book uploaded successfully",

@@ -1,27 +1,28 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "../supabase";
 
 function Library() {
   const navigate = useNavigate();
   const [books, setBooks] = useState([]);
 
   /* FETCH BOOKS */
-  useEffect(() => {
-    const fetchBooks= async()=>{
-      const {data,error}=await supabase
-      .from("books")
-      .select("*")
-      .eq("is_archived",false);
-    if(error){
-      console.error(error);
-      return;
-    }
-    console.log(data);
-    setBooks(data);
+  useEffect(()=>{
+    const fetchBooks=async()=>{
+      try{
+        const response=await fetch("https://elysian-pages.onrender.com/books");
+        if (!response.ok){
+          throw new Error("Failed to fetch books");
+        }
+        const data=await response.json();
+        console.log("BOOKS FROM BACKEND: ",data);
+        setBooks(data);
+      }
+      catch (error){
+        console.error("Error fetching books: ",error);
+      }
     };
     fetchBooks();
-  }, []);
+  },[]);
 
   return (
 
