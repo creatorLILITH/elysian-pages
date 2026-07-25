@@ -82,38 +82,13 @@ app.post(
 
       const result =
         await pool.query(
-
-          `INSERT INTO books
-          (
-            title,
-            author,
-            category,
-            genre,
-            cover_url,
-            file_url
-          )
-
-          VALUES
-          (
-            $1,
-            $2,
-            $3,
-            $4,
-            $5,
-            $6
-          )
-
+          `INSERT INTO books(title,author,category,genre,cover_url,file_url)
+          VALUES($1,$2,$3,$4,$5,$6)
           RETURNING *`,
-
-          [
-            title,
-            author,
-            category,
-            genre,
-            cover_url,
-            file_url,
-          ]
+          [title,author,category,genre,cover_url,file_url,]
         );
+        console.log("DATABASE INSERT RESULT: ",result.rows);
+        console.log("ROWS INSERTED: ",result.rowCount);
 
       res.json({
 
