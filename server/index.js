@@ -3,8 +3,8 @@ const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
 const pool = require("./db");
-const { constants } = require("perf_hooks");
 const app = express();
+const bcrypt = require("bcrypt");
 /* ---------------- MIDDLEWARE ---------------- */
 app.use(cors());
 app.use(express.json());
@@ -116,6 +116,7 @@ app.post("/signup", async(req,res)=>{
   try {
     const{username,email,password,}=req.body;
     /*Check if user is already registerd*/
+    const hashedPassword=await bcrypt.hash(password,10);
     const existingUser=await pool.query("SELECT * FROM users WHERE email=$1",[email]);
     if(existingUser.rows.length>0){
       return
@@ -123,7 +124,7 @@ app.post("/signup", async(req,res)=>{
     }
     /*Insert new user*/
     const result=await pool.query(`INSERT INTO users(username,email,password)
-      VALUES($1, $2, $3) RETURNING *`,[username,email,password]);
+      VALUES($1, $2, $3) RETURNING *`,[username,email,hashedPassword]);
       res.json({message:"Signup Successful!!",
         user:result.rows[0],
       });
@@ -153,10 +154,9 @@ app.post("/login", async (req, res) => {
       });
     }
 
-    if (user.password !== password) {
-      return res.status(400).json({
-        error: "Incorrect password",
-      });
+    const passwordMatch=await bcrypt.compare(password, user.password);
+    if (!passwordMatch){
+      return res.status(400).json({error: "Incorrect Password",});
     }
 
     res.json({
@@ -207,8 +207,10 @@ app.post("/upload-book",
       } = req.body;
       const file_url=req.files.book[0].path;
       const cover_url=req.files.cover[0].path;
-      console.log(req.file);
+      console.log(req.files);
       console.log(file_url);
+      console.log("BODY:",req.body);
+      console.log("FILES:",req.files);
       const result = await pool.query(
         `
         INSERT INTO library_books
