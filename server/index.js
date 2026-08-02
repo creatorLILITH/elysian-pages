@@ -242,6 +242,28 @@ app.post("/upload-book",
     }
   }
 );
+/*-------------DELETE BOOK FROM THE PUBLIC LIBRARY-------------*/
+app.delete("/delete-book/:id",async(req,res)=>{
+  try{
+    const { id }=req.params;
+    const result=await pool.query("DELETE FROM library_books WHERE id=$1 RETURNING *",
+      [id]);
+    if (result.rows.length===0){
+      return res.status(404).json({
+        message: "Book not found",
+      });
+    }
+    res.json({
+      message:"Book deleted successfully",
+    });
+  }
+  catch (error){
+    console.error(error);
+    res.status(500).json({
+      message:"Failed to delete book",
+    });
+  }
+});
 
 app.get("/books", async (req, res) => {
   try {

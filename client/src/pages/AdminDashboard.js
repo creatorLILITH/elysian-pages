@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function AdminDashboard() {
   const [title, setTitle] = useState("");
@@ -6,6 +6,7 @@ function AdminDashboard() {
   const [category, setCategory] = useState("");
   const [bookFile, setBookFile] = useState(null);
   const [cover, setCover]=useState(null);
+  const [books, setBooks]=useState([]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -42,6 +43,36 @@ function AdminDashboard() {
       alert("Upload failed");
     }
   };
+  const fetchBooks=async()=>{
+    try{
+      const res=await fetch("https://elysian-pages.onrender.com/books");
+      const data=await res.json();
+      console.log(data);
+      setBooks(data);
+    }
+    catch(error){
+      console.log(error);
+    }
+  };
+  const handleDelete=async(id)=>{
+    try{
+      const res=await fetch(`https://elysian-pages.onrender.com/delete-book/${id}`,
+      {
+        method:"DELETE",
+      });
+      if (res.ok){
+        fetchBooks();
+      }else{
+        alert("Failed to delete book");
+      }
+    }catch (error){
+      console.error(error);
+      alert("Something went wrong");
+    }
+  };
+  useEffect(()=>{
+    fetchBooks();
+  },[]);
   return (
     <div style={pageStyle}>
       <div style={cardStyle}>
@@ -100,6 +131,21 @@ function AdminDashboard() {
             Upload Book
           </button>
         </form>
+        <h2 style={{color:"#f8d49d",marginTop:"30px"}}>
+          Uploaded Books
+        </h2>
+        <div>
+          {books.map((book)=>(
+            <div key={book.id}
+            style={{display:"flex",justifyContent:"space-between",
+              alignItems:"center",marginBottom:"10px",padding:"10px",
+              background:"rgba(255,255,255,0.08)",borderRadius:"8px",
+            }}>
+              <span>{book.title}</span>
+              <button onClick={()=>handleDelete(book.id)}>DELETE</button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
