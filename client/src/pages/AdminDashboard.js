@@ -45,7 +45,7 @@ function AdminDashboard() {
   };
   const fetchBooks=async()=>{
     try{
-      const res=await fetch("https://elysian-page.onrender.com/books");
+      const res=await fetch("https://elysian-pages.onrender.com/books");
       const data=await res.json();
       console.log(data);
       setBooks(data);
