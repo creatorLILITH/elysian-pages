@@ -46,11 +46,15 @@ app.post(
   ]),
 
   async (req, res) => {
+    console.log("Upload Route Hit");
+    console.log(req.file);
+    console.log(req.files);
 
     try {
 
       const file =
-        req.file;
+        req.files.book[0];
+        console.log("File selected:", file);
 
       if (!file) {
 
@@ -78,7 +82,7 @@ app.post(
         "https://covers.openlibrary.org/b/id/7222246-L.jpg";
 
       const file_url =
-        `http://localhost:5000/uploads/${file.filename}`;
+        `https://elysian-pages.onrender.com/uploads/${file.filename}`;
 
       const result =
         await pool.query(
@@ -100,13 +104,9 @@ app.post(
       });
 
     } catch (error) {
-
       console.log(error);
-
       res.status(500).json({
-
-        error:
-          "Database error",
+        error:"Database error",
       });
     }
   }
