@@ -199,8 +199,10 @@ function Reader() {
     book.fileUrl;
 
   const fileUrl = rawUrl
-    ? `https://elysian-pages.onrender.com/${rawUrl.replaceAll("\\", "/")}`
-    : "";
+  ? (rawUrl.startsWith("http")
+  ? rawUrl
+  :`https://elysian-pages.onrender.com/${rawUrl.replaceAll("\\","/")}`)
+  : "";
 
   const isPDF =
     fileUrl?.toLowerCase().endsWith(".pdf");

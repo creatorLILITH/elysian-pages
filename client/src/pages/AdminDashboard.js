@@ -21,7 +21,7 @@ function AdminDashboard() {
     formData.append("book", bookFile);
     formData.append("cover",cover);
     try {
-      const res = await fetch("https://elysian-pages.onrender.com/upload",
+      const res = await fetch("http://localhost:5000/upload-book",
         {
           method: "POST",
           body: formData,
