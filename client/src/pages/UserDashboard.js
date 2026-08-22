@@ -1,18 +1,49 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function UserDashboard() {
 
   const navigate = useNavigate();
+  const [recentBooks, setRecentBooks]=useState([]);
 
   const myBooks =
     JSON.parse(
       localStorage.getItem("myLibrary")
     ) || [];
 
-  const recentBooks =
-    JSON.parse(
-      localStorage.getItem("recentBooks")
-    ) || [];
+    useEffect(() => {
+  const fetchRecentBooks = async () => {
+    try {
+      const response = await fetch(
+        "https://elysian-pages.onrender.com/books"
+      );
+
+      const publicBooks = await response.json();
+
+      const storedRecentBooks =
+        JSON.parse(
+          localStorage.getItem("recentBooks")
+        ) || [];
+
+      const validRecentBooks =
+        storedRecentBooks.filter((recentBook) =>
+          publicBooks.some(
+            (publicBook) =>
+              publicBook.title === recentBook.title
+          )
+        );
+
+      setRecentBooks(validRecentBooks);
+    } catch (error) {
+      console.error(
+        "Error checking recent books:",
+        error
+      );
+    }
+  };
+
+  fetchRecentBooks();
+}, []);
 
   return (
 
@@ -134,7 +165,10 @@ function UserDashboard() {
 
               {book.cover_url ? (
                 <img
-                  src={`https://elysian-pages.onrender.com/${book.cover_url}`}
+                  src={book.cover_url?.startsWith("http")
+                    ? book.cover_url
+                    : `https://elysian-pages.onrender.com/${book.cover_url}`
+                  }
                   alt={book.title}
                   style={coverStyle}
                 />

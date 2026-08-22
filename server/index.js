@@ -198,11 +198,17 @@ app.post("/upload-book",
         category,
       } = req.body;
       const bookFile=req.files.book[0];
-      const filePath=`books/${Date.now()}-${bookFile.originalname}`;
-      const { data: bookData, error: bookError} = await supabase.storage
+      const coverFile=req.files.cover[0];
+
+      const safeBookName=bookFile.originalname.replace(/[^a-zA-Z0-9._-]/g,"_");
+      const safeCoverName=coverFile.originalname.replace(/[^a-zA-Z0-9._-]/g,"_");
+
+      const coverPath=`covers/${Date.now()}-${safeCoverName}`;
+      const filePath=`books/${Date.now()}-${safeBookName}`;
+
+      const { data: bookData, error: bookError }=await supabase.storage
       .from("elysian-books")
-      .upload(filePath,
-      bookFile.buffer,{
+      .upload(filePath, bookFile.buffer,{
         contentType:bookFile.mimetype,
         upsert:false,
       });
@@ -212,14 +218,37 @@ app.post("/upload-book",
           error:"Failed to upload book to storage",
         });
       }
-      const { data:publicUrlData } = supabase.storage
+
+      const { data:coverData, error:coverError }=await supabase.storage
       .from("elysian-books")
-      .getPublicUrl(filePath);
-      const fileUrl=publicUrlData.publicUrl;
-      const result=await pool.query(`INSERT INTO library_books
-        (title,author,category,file_url,uploaded_by,is_public,
-        is_archived) VALUES ($1,$2,$3,$4,$5,$6,$7)
-        RETURNING *`,[title,author,category,fileUrl,null,true,false]);
+      .upload(coverPath, coverFile.buffer,{
+        contentType:coverFile.mimetype,
+        upsert:false,
+      });
+      if (coverError){
+        console.log("COVER STORAGE ERROR:",coverError);
+        return res.status(500).json({
+          error:"Failed to upload cover to storage",
+        });
+      }
+      const { data: publicBookUrlData } =
+  supabase.storage
+    .from("elysian-books")
+    .getPublicUrl(filePath);
+
+const { data: publicCoverUrlData } =
+  supabase.storage
+    .from("elysian-books")
+    .getPublicUrl(coverPath);
+
+const fileUrl = publicBookUrlData.publicUrl;
+const coverUrl = publicCoverUrlData.publicUrl;
+      const result=await pool.query(
+        `INSERT INTO library_books
+        (title,author,category,file_url,cover_url,uploaded_by,is_public,
+        is_archived) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+        [title,author,category,fileUrl,coverUrl,null,true,false]
+      );
       console.log("LIBRARY BOOK INSERT RESULT:",result.rows);
       console.log("BODY:",req.body);
       console.log("FILES:",req.files);
