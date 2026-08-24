@@ -1,5 +1,6 @@
 import "./LandingPage.css";
 import { Link } from "react-router-dom";
+import logoImage from "../assets/elysian-pages_logo.png";
 
 function LandingPage() {
 
@@ -10,8 +11,15 @@ function LandingPage() {
       {/* Navbar */}
       <nav className="navbar">
 
-        <div className="logo">
-        Elysian Pages
+        <div className="brand">
+        <img
+          src={logoImage}
+          alt="Elysian Pages logo"
+          className="brand-logo"
+        />
+        <span className="brand-name">
+          Elysian Pages
+        </span>
         </div>
 
         <div className="nav-links">
