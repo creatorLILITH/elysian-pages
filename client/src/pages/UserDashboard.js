@@ -72,7 +72,8 @@ function UserDashboard() {
             My Library
           </button>
 
-          <button style={navBtn}>
+          <button style={navBtn}
+          onClick={()=> navigate("/profile")}>
             Profile
           </button>
 

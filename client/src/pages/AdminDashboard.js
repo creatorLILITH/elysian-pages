@@ -1,12 +1,20 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabase";
 
 function AdminDashboard() {
+  const navigate=useNavigate();
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [category, setCategory] = useState("");
   const [bookFile, setBookFile] = useState(null);
   const [cover, setCover]=useState(null);
   const [books, setBooks]=useState([]);
+  const handleLogout=async()=>{
+    await supabase.auth.signOut();
+    localStorage.removeItem("user");
+    navigate("/");
+  };
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -79,6 +87,9 @@ function AdminDashboard() {
         <h1 style={titleStyle}>
           Admin Dashboard
         </h1>
+        <button onClick={handleLogout} style={logoutButtonStyle}>
+          Log-out
+        </button>
         <form onSubmit={handleUpload}>
           <input
             type="text"
@@ -201,6 +212,17 @@ const labelStyle={
   marginBottom:"8px",
   marginTop:"12px",
   fontSize:"14px",
+};
+const logoutButtonStyle={
+  display:"block",
+  margin:"0 auto 25px",
+  padding:"10px 24px",
+  border:"1px solid #a47148",
+  borderRadius:"14px",
+  background:"transparent",
+  color:"#f8e7c7",
+  cursor:"pointer",
+  fontFamily:"Georgia, serif",
 };
 
 export default AdminDashboard;
