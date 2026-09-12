@@ -150,7 +150,7 @@ function ReaderToolbar({
 
               onChange={(e) =>
                 setFontSize(
-                  e.target.value
+                  Number(e.target.value)
                 )
               }
 

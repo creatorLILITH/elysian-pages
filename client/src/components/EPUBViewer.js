@@ -28,49 +28,28 @@ function EPUBViewer({
     console.log("Restoring Highlights:",savedHighlights);
   },[book]);
 
-  // Apply themes dynamically
-  useEffect(() => {
-
-    if (renditionRef.current) {
-
+  //Apply themes dynamically
+  useEffect(()=>{
+    if (renditionRef.current){
       renditionRef.current.themes.default({
-        body: {
-          background: darkMode
-            ? "#111"
-            : "#fff",
-
-          color: darkMode
-            ? "#fff"
-            : "#000",
-
-          "font-size":
-            `${fontSize}px`,
+        body:{
+          background: darkMode?"#111":"#fff",
+          color: darkMode?"#fff":"#000"
         },
       });
-
-      renditionRef.current.themes.select(
-        "default"
-      );
-
-      // Hide epub.js floating button
-      const buttons =
-        document.querySelectorAll("button");
-
-      buttons.forEach((btn) => {
-
-        if (
-          btn.innerText.includes("🌙") ||
-          btn.innerText.includes("☀")
-        ) {
-          btn.style.display = "none";
-        }
-
+      renditionRef.current.themes.select("default");
+      //Apply font size directly to the EPUB
+      renditionRef.current.themes.fontSize(`${fontSize}px`);
+      //Hide epub.js floating button
+      const buttons=document.querySelectorAll("button");
+      buttons.forEach((btn)=>{
+        if (btn.innerText.includes("🌙")||btn.innerText.includes("☀"))
+      {
+        btn.style.display="none";
+      }
       });
-
     }
-
-  }, [darkMode, fontSize]);
-
+  },[darkMode,fontSize]);
   // Search inside EPUB
   useEffect(() => {
     console.log("SEARCH EFFECT RUNNING");
