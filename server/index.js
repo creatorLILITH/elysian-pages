@@ -306,6 +306,46 @@ app.get("/books", async (req, res) => {
     });
   }
 });
+/*------------DICTIONARY ROUTE------------------*/
+app.get("/dictionary/:word", async (req, res) => {
+  try {
+    const { word } = req.params;
+    const response = await fetch(
+      `https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(word)}`
+    );
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: "Word not found",
+      });
+    }
+    const data = await response.json();
+    console.log("DICTIONARY API DATA:",data);
+    const englishEntries = data.en || [];
+    const meanings = englishEntries.map((entry) => ({
+      partOfSpeech: entry.partOfSpeech,
+      definitions: (entry.definitions || []).map((definition) => ({
+        definition: definition.definition
+          .replace(/<[^>]*>/g, "")
+          .trim(),
+        example: definition.example
+          ? definition.example.replace(/<[^>]*>/g, "").trim()
+          : null,
+      })),
+    }));
+
+    res.json({
+      word,
+      meanings,
+    });
+  }
+  catch (error) {
+    console.log("Dictionary API error:", error);
+
+    res.status(500).json({
+      error: "Dictionary lookup failed",
+    });
+  }
+});
 
 /* ---------------- TEST ROUTE ---------------- */
 

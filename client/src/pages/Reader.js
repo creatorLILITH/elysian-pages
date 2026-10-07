@@ -13,39 +13,81 @@ function Reader() {
   const location = useLocation();
   const book =
     location.state?.book || location.state;
+    console.log("CURRENT BOOK:",book);
+    console.log("CURRENT BOOK ID:",book?.id);
   /*--------- STATES ---------*/
   const [locationState, setLocationState] = useState(null);
   const [bookmarks, setBookmarks] = useState([]);
   const [notes, setNotes] = useState([]);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(()=>{
+    const savedDarkMode= localStorage.getItem("darkMode");
+    return savedDarkMode?JSON.parse(savedDarkMode):false;
+  });
+  const [readerTheme, setReaderTheme] = useState(()=>{
+    const savedReaderTheme=localStorage.getItem("readerTheme");
+    return savedReaderTheme||"classicLight";
+  });
+  const readerThemes={
+    classicLight:{name:"Classic Light",background:"#FFFFFF",text:"#000000",},
+    classicDark:{name:"Classic Dark",background:"#000000",text:"#FFFFFF",},
+    mistyBlue:{name:"Misty Blue",background:"#E1E9ED",text:"#303A40",accent:"#668996"},
+    dustyRose:{name:"Dusty Rose",background:"#ECDCDF",text:"#403436",accent:"#9B717C",},
+    midnightLibrary:{name:"Midnight Library",background:"#171A22",text:"#E3E4EA",accent:"#8995B5",},
+    candlelight:{name:"Candlelight",background:"#F1E6CF",text:"#3C3328",accent:"#A3824F",},
+    sageGreen:{name:"Sage Green",background:"#E1E8DD",text:"#30382F",accent:"#71856C",},
+    coffeeCream:{name:"Coffee & Cream",background:"#F6EFE3",text:"#3B3028",accent:"#A87545",},
+    winterMist:{name:"Winter Mist",background:"#E5E7E8",text:"#34383A",accent:"#748999",},
+    forestNight:{name:"Forest Night",background:"#18221E",text:"#D7DDD8",accent:"#829B88",},
+  };
+  useEffect(()=>{
+    localStorage.setItem("readerTheme",readerTheme);
+  },[readerTheme]);
   const [fontSize, setFontSize] = useState(18);
   const [searchText, setSearchText] = useState("");
-  const [highlights, setHighlights] = useState([]);
-  const [showMenu, setShowMenu] = useState(false);
+  const [searchRequest, setSearchRequest] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
+  const [highlights, setHighlights] = useState(()=>{
+    if(!book) return[];
+    return JSON.parse(localStorage.getItem(`highlights-${book.id}`))||[];
+  });
+  useEffect(()=>{
+    if (!book) return;
+    localStorage.setItem(`highlights-${book.id}`,JSON.stringify(highlights));
+  },[highlights, book]);
+  const [removeHighlight, setRemoveHighlight]=useState(null);
   const [showHighlights, setShowHighlights] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [showDictionary, setShowDictionary] = useState(false);
+  const [dictionaryWord, setDictionaryWord] = useState("");
+  const [dictionaryData, setDictionaryData] = useState(null);
 
-  /*---------- LOAD SAVED HIGHLIGHTS --------------*/
-
-  useEffect(() => {
-
-    if (!book) return;
-
-    const savedHighlights =
-      JSON.parse(
-        localStorage.getItem(
-          `highlights-${book.title}`
-        )
-      ) || [];
-
-    console.log("Loaded Highlights:",savedHighlights);
-    setHighlights(savedHighlights);
-
-  }, [book]);
+  useEffect(()=>{
+    const fetchDefinition=async()=>{
+      if (!showDictionary||!dictionaryWord){
+        return;
+      }
+      const word=dictionaryWord.trim().split(/\s+/)[0];
+      try{
+        setDictionaryData(null);
+        const response= await fetch(`http://localhost:5000/dictionary/${encodeURIComponent(word)}`);
+        if (!response.ok){
+          throw new Error("Word Not Found");
+        }
+        const data=await response.json();
+        setDictionaryData(data);
+      }
+      catch(error){
+        console.error("Dictionary Error:",error);
+        setDictionaryData(null);
+      }
+    };
+    fetchDefinition();
+  },[showDictionary,dictionaryWord]);
 
   /* SAVE RECENTLY OPENED BOOKS */
-
   useEffect(() => {
 
     if (!book) return;
@@ -78,16 +120,25 @@ function Reader() {
 
   /* SEARCH */
 
-  const handleSearch = () => {
-
-    if (!searchText) return;
-
-    console.log("Searching triggered");
-
+  const handleSearch=()=>{
+    const query=searchText.trim();
+    if (!query) return;
+    setSearchResults([]);
+    setCurrentSearchIndex(0);
+    setSearchRequest(query);
+  };
+  const goToNextSearchResult=()=>{
+    if (searchResults.length===0) return;
+    setCurrentSearchIndex((prevIndex)=>
+    prevIndex+1<searchResults.length?prevIndex+1:0);
+  };
+  const goToPreviousSearchResult=()=>{
+    if (searchResults.length===0) return;
+    setCurrentSearchIndex((prevIndex)=>prevIndex-1>=0
+  ?prevIndex-1:searchResults.length-1);
   };
 
   /* LOAD SAVED DATA */
-
   useEffect(() => {
 
     if (book) {
@@ -111,19 +162,6 @@ function Reader() {
         ) || [];
 
       setBookmarks(savedBookmarks);
-
-      /* Dark mode */
-
-      const savedDarkMode =
-        localStorage.getItem("darkMode");
-
-      if (savedDarkMode) {
-
-        setDarkMode(
-          JSON.parse(savedDarkMode)
-        );
-
-      }
 
       /* Font size */
 
@@ -258,196 +296,369 @@ function Reader() {
     );
 
   };
+return (
+  <div
+    style={{
+      padding: "20px",
+      paddingBottom: "90px",
+      backgroundColor: readerThemes[readerTheme].background,
+      color: readerThemes[readerTheme].text,
+      minHeight: "100vh",
+    }}
+  >
 
-  return (
-
+    {/* READER GRID */}
     <div
       style={{
-        padding: "20px",
-        backgroundColor:
-          darkMode ? "#111" : "#fff",
-        color:
-          darkMode ? "white" : "black",
-        minHeight: "100vh",
+        display: "grid",
+        gridTemplateColumns:
+          showHighlights || showBookmarks || showNotes || showDictionary
+            ? "minmax(0, 1fr) 320px"
+            : "minmax(0, 1fr)",
+        gap: "20px",
+        alignItems: "start",
+        transition: "grid-template-columns 0.3s ease",
       }}
     >
 
-<button
-  onClick={() => setShowMenu(!showMenu)}
-  style={{
-    position: "fixed",
-    top: "20px",
-    left: "20px",
-    zIndex: 9999,
-    background: "#3d2b1f",
-    color: "#f5d7a1",
-    border: "none",
-    borderRadius: "10px",
-    padding: "10px 14px",
-    cursor: "pointer",
-    fontSize: "22px",
-  }}
->
-  ☰
-</button>
-
-{showMenu && (
-  <div
-    style={{
-      position: "fixed",
-      top: "80px",
-      left: "20px",
-      width: "250px",
-      background: "#3d2b1f",
-      color: "#f5d7a1",
-      padding: "20px",
-      borderRadius: "15px",
-      zIndex: 9998,
-      boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
-    }}
-  >
-    {showHighlights && (
-  <HighlightSection
-    highlights={highlights}
-    setHighlights={setHighlights}
-    book={book}
-  />
-)}
-{showBookmarks && (
-  <BookmarkSection
-    isEPUB={isEPUB}
-    bookmarks={bookmarks}
-    addBookmark={addBookmark}
-    deleteBookmark={deleteBookmark}
-    setLocationState={setLocationState}
-  />
-)}
-{showNotes && (
-  <NotesSection
-    notes={notes}
-    setNotes={setNotes}
-    saveNotes={saveNotes}
-  />
-)}
-    <h3>Reader Menu</h3>
-
-    <button
-  onClick={() => setShowHighlights(!showHighlights)}
-  style={{
-    width: "100%",
-    padding: "10px",
-    marginBottom: "10px",
-  }}
->
-  Highlights
-</button>
-
-    <button
-  onClick={() =>
-    setShowBookmarks(
-      !showBookmarks
-    )
-  }
-  style={{
-    width: "100%",
-    padding: "10px",
-    marginBottom: "10px",
-  }}
->
-  Bookmarks
-</button>
-
-    <button
-  onClick={() =>
-    setShowNotes(!showNotes)
-  }
-  style={{
-    width: "100%",
-    padding: "10px",
-  }}
->
-  Notes
-</button>
-  </div>
-)}
-
-      <div
-  style={{
-    marginBottom: "5px",
-  }}
->
-  <h2 style={{margin:0,
-    fontSize:"24px",
-  }}>
-    {book.title}
-  </h2>
-
-  <p style={{opacity:0.7,
-    margin:0,
-    fontSize:"14px",
-  }}>
-    {book.author}
-  </p>
-</div>
-
-<hr />
-
-      {/* SEARCH */}
-
-      <SearchBar
-        searchText={searchText}
-        setSearchText={setSearchText}
-        handleSearch={handleSearch}
-        darkMode={darkMode}
-      />
-
-{/*READER TOOLBAR TEMPORARILY HIDDEN */}
-<ReaderToolbar
-  darkMode={darkMode}
-  setDarkMode={setDarkMode}
-  fontSize={fontSize}
-  setFontSize={setFontSize}
-/>
-{/* PDF VIEWER */}
-
-{isPDF && (
-  <PDFViewer fileUrl={fileUrl} />
-)}
-
-{/* EPUB VIEWER */}
-
-{isEPUB && (
-
-  <EPUBViewer
-    fileUrl={fileUrl}
-    locationState={locationState}
-    setLocationState={setLocationState}
-    book={book}
-    darkMode={darkMode}
-    fontSize={fontSize}
-    searchText={searchText}
-    setHighlights={setHighlights}
-  />
-
-)}
-
+      {/* MAIN BOOK AREA */}
+      <div style={{ minWidth: 0 }}>
+      
       {/* FALLBACK TEXT */}
+    {!isPDF && !isEPUB && (
+      <p
+        style={{
+          fontSize: `${fontSize}px`,
+          lineHeight: "1.8",
+        }}>
+        {book.content}
+      </p>
+    )}
 
-      {!isPDF && !isEPUB && (
 
-        <p
-          style={{
-            fontSize: `${fontSize}px`,
-            lineHeight: "1.8",
-          }}
-        >
-          {book.content}
+        {/* BOOK INFORMATION */}
+        <div style={{ marginBottom: "5px" }}>
+          <h2
+            style={{
+              opacity: 0.7,
+              fontSize: "24px",
+            }}
+          >
+            {book.title}
+          </h2>
+
+          <p
+            style={{
+              opacity: 0.7,
+              margin: 0,
+              fontSize: "14px",
+            }}
+          >
+            {book.author}
+          </p>
+        </div>
+
+        <hr />
+
+        {/* SEARCH */}
+        {showSearch && (<>
+          <SearchBar
+          searchText={searchText}
+          setSearchText={setSearchText}
+          handleSearch={handleSearch}
+          darkMode={darkMode}
+        />
+
+        <p>
+          Search Results:{searchResults.length}
         </p>
 
-      )}
-    </div>
-  );
+        <button onClick={goToNextSearchResult}>
+          Next Result
+        </button>
 
+        <button onClick={goToPreviousSearchResult}>
+          Previous Result
+        </button>
+        </>
+        )}
+
+        {/* READER TOOLBAR */}
+        <ReaderToolbar
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+          fontSize={fontSize}
+          setFontSize={setFontSize}
+          readerTheme={readerTheme}
+          setReaderTheme={setReaderTheme}
+          readerThemes={readerThemes}
+          showHighlights={showHighlights}
+          setShowHighlights={setShowHighlights}
+          showBookmarks={showBookmarks}
+          setShowBookmarks={setShowBookmarks}
+          showNotes={showNotes}
+          setShowNotes={setShowNotes}
+          showSearch={showSearch}
+          setShowSearch={setShowSearch}
+        />
+
+        {/* PDF VIEWER */}
+        {isPDF && (
+          <PDFViewer fileUrl={fileUrl} />
+        )}
+
+        {/* EPUB VIEWER */}
+        {isEPUB && (
+          <div
+            style={{
+              paddingBottom: "90px",
+              minWidth: 0,
+            }}
+          >
+            <EPUBViewer
+              fileUrl={fileUrl}
+              locationState={locationState}
+              setLocationState={setLocationState}
+              book={book}
+              darkMode={darkMode}
+              fontSize={fontSize}
+              searchText={searchText}
+              setSearchResults={setSearchResults}
+              searchResults={searchResults}
+              currentSearchIndex={currentSearchIndex}
+              setHighlights={setHighlights}
+              readerTheme={readerTheme}
+              readerThemes={readerThemes}
+              setRemoveHighlight={setRemoveHighlight}
+              onDictionaryOpen={(word) => {
+                setDictionaryWord(word);
+                setShowDictionary(true);
+              }}
+            />
+          </div>
+        )}
+
+      </div>
+
+      {/* RIGHT-SIDE UTILITY PANEL */}
+      {(showHighlights || showBookmarks || showNotes || showDictionary) && (
+        <div style={{width:"100%",
+          maxHeight:"70vh",
+          overflowY: "auto",
+            background: readerThemes[readerTheme].background,
+            color: readerThemes[readerTheme].text,
+            padding: "20px",
+            borderRadius: "15px",
+            boxSizing: "border-box",
+            boxShadow: "0 8px 10px rgba(0,0,0,0.3)",
+            border: `1px solid ${
+              readerThemes[readerTheme].accent ||
+              readerThemes[readerTheme].text
+            }`,
+            position: "sticky",
+            top: "20px",
+          }}
+        >
+
+          {showHighlights && (
+            <div
+              style={{
+                position: "relative",
+                marginBottom: "25px",
+              }}
+            >
+              <button
+                onClick={() => setShowHighlights(false)}
+                title="Close Highlights"
+                aria-label="Close Highlights"
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  right: "0",
+                  background: "transparent",
+                  border: "none",
+                  color: readerThemes[readerTheme].text,
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  lineHeight: "1",
+                  padding: "2px 6px",
+                  zIndex: 2,
+                }}
+              >
+                ×
+              </button>
+
+              <HighlightSection
+                highlights={highlights}
+                setHighlights={setHighlights}
+                book={book}
+                removeHighlight={removeHighlight}
+              />
+            </div>
+          )}
+
+          {showBookmarks && (
+            <div
+              style={{
+                position: "relative",
+                marginBottom: "25px",
+              }}
+            >
+              <button
+                onClick={() => setShowBookmarks(false)}
+                title="Close Bookmarks"
+                aria-label="Close Bookmarks"
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  right: "0",
+                  background: "transparent",
+                  border: "none",
+                  color: readerThemes[readerTheme].text,
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  lineHeight: "1",
+                  padding: "2px 6px",
+                  zIndex: 2,
+                }}
+              >
+                ×
+              </button>
+
+              <BookmarkSection
+                isEPUB={isEPUB}
+                bookmarks={bookmarks}
+                addBookmark={addBookmark}
+                deleteBookmark={deleteBookmark}
+                setLocationState={setLocationState}
+              />
+            </div>
+          )}
+
+          {showNotes && (
+            <div
+              style={{
+                position: "relative",
+                marginBottom: "25px",
+              }}
+            >
+              <button
+                onClick={() => setShowNotes(false)}
+                title="Close Notes"
+                aria-label="Close Notes"
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  right: "0",
+                  background: "transparent",
+                  border: "none",
+                  color: readerThemes[readerTheme].text,
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  lineHeight: "1",
+                  padding: "2px 6px",
+                  zIndex: 2,
+                }}
+              >
+                ×
+              </button>
+
+              <NotesSection
+                notes={notes}
+                setNotes={setNotes}
+                saveNotes={saveNotes}
+              />
+            </div>
+          )}
+
+          {showDictionary && (
+            <div
+              style={{
+                position: "relative",
+                marginBottom: "25px",
+              }}
+            >
+              <button
+                onClick={() => setShowDictionary(false)}
+                title="Close Dictionary"
+                aria-label="Close Dictionary"
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  right: "0",
+                  background: "transparent",
+                  border: "none",
+                  color: readerThemes[readerTheme].text,
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  lineHeight: "1",
+                  padding: "2px 6px",
+                  zIndex: 2,
+                }}
+              >
+                ×
+              </button>
+
+              <h2 style={{ marginTop: 0 }}>
+                Dictionary
+              </h2>
+
+              <h3>
+                {dictionaryWord}
+              </h3>
+
+              {!dictionaryData && (
+                <p style={{ opacity: 0.7 }}>
+                  Looking up definition....
+                </p>
+              )}
+
+              {dictionaryData && dictionaryData.meanings && (
+                <div>
+                  {dictionaryData.meanings.map((meaning, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        marginBottom: "20px",
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontStyle: "italic",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {meaning.partOfSpeech}
+                      </p>
+
+                      {meaning.definitions.map(
+                        (definition, definitionIndex) => (
+                          <p
+                            key={definitionIndex}
+                            style={{
+                              lineHeight: "1.6",
+                            }}
+                          >
+                            <strong>
+                              {definitionIndex + 1}.
+                            </strong>{" "}
+                            {definition.definition}
+                          </p>
+                        )
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
+      )}
+
+    </div>
+  </div>
+);
 }
 
 export default Reader;
