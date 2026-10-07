@@ -44,7 +44,6 @@ function Reader() {
   },[readerTheme]);
   const [fontSize, setFontSize] = useState(18);
   const [searchText, setSearchText] = useState("");
-  const [searchRequest, setSearchRequest] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
@@ -125,7 +124,6 @@ function Reader() {
     if (!query) return;
     setSearchResults([]);
     setCurrentSearchIndex(0);
-    setSearchRequest(query);
   };
   const goToNextSearchResult=()=>{
     if (searchResults.length===0) return;
