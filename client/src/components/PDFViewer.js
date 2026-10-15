@@ -3,7 +3,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css"
 import "react-pdf/dist/Page/AnnotationLayer.css";
 //Use the PDF.js worker version bundled with react-pdf
-pdfjs.GlobalWorkerOptions.workerSrc= new URL("pdfjs-dist/build/pdf.worker.min.mjs",import.meta.url).toString();
+pdfjs.GlobalWorkerOptions.workerSrc=`https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 function PDFViewer({fileUrl,readerTheme,readerThemes,book,setHighlights,
   onDictionaryOpen,}){
   const [numPages,setNumPages]=useState(null);
@@ -40,35 +40,106 @@ function PDFViewer({fileUrl,readerTheme,readerThemes,book,setHighlights,
       });
       setShowColorPicker(true);
   };
-  const applyHighlight=(color)=>{
-    console.log("PDF Highlight API diagnostic:",{
-      cssAvaliable:typeof window.CSS!=="undefined",
-      highlightsAvaliable:Boolean(window.CSS?.highlights),
-      highlightConstuctorAvaliable:typeof window.Highlight==="function",
-    });
-    if(!window.CSS?.highlights||typeof window.Highlight!=="function"){
-      alert("DEBUG: PDF highlight compatibility check failed.");
-      return;
+const applyHighlight = (color) => {
+  if (
+    !window.CSS?.highlights ||
+    typeof window.Highlight !== "function"
+  ) {
+    alert("Text highlighting is not supported by this browser.");
+    return;
+  }
+
+  if (!selectedRange || !selectedRange.startContainer.isConnected) {
+    console.warn("The selected PDF text is no longer available.");
+    return;
+  }
+
+  const highlightName = `pdf-highlight-${Date.now()}`;
+
+  const style = document.createElement("style");
+  style.textContent = `
+    ::highlight(${highlightName}) {
+      background-color: ${color};
+      color: #000000;
     }
-    const highlightName=`pdf-highlight-${Date.now()}`;
-    const style=document.createElement("style");
-    style.textContent=`::highlight(${highlightName}){
-    background-color:${color};
-    color:#000000;}`;
-    document.head.appendChild(style);
-    window.CSS.highlights.set(highlightName,
-      new window.Highlight(selectedRange)
-    );
-    if(book?.id && typeof setHighlights==="function"){
-      setHighlights((prev)=>[...prev,{
-        text:selectedText,
+  `;
+  document.head.appendChild(style);
+
+  window.CSS.highlights.set(
+    highlightName,
+    new window.Highlight(selectedRange)
+  );
+
+  if (book?.id && typeof setHighlights === "function") {
+    setHighlights((prev) => [
+      ...prev,
+      {
+        text: selectedText,
         color,
         pageNumber,
-        type:"pdf",
-      },]);
+        type: "pdf",
+      },
+    ]);
+  }
+
+  setShowColorPicker(false);
+};
+const restorePdfHighlights=()=>{
+  if (!book?.id||!window.CSS?.highlights||
+    typeof window.Highlight!=="function"){
+      return;
     }
-    setShowColorPicker(false);
-  };
+    const textLayer=document.querySelector(
+      ".react-pdf__Page .textLayer"
+    );
+    if(!textLayer) return;
+    const savedHighlights=JSON.parse(localStorage.getItem(`highlights-${book.id}`)||"[]");
+    //Remove previously restored highlights to prevent duplicates
+    for (const name of window.CSS.highlights.keys()){
+      if(name.startsWith("pdf-saved-")){
+        window.CSS.highlights.delete(name);
+      }
+    }
+    const textNodes=[];
+    const walker=document.createTreeWalker(textLayer,NodeFilter.SHOW_TEXT);
+    let node;
+    while((node=walker.nextNode())){
+      textNodes.push({node,
+        start:textNodes.reduce((total,item)=>total+
+      item.node.textContent.length,0),
+      });
+    }
+    const fullText=textNodes
+      .map((item)=>item.node.textContent)
+      .join("");
+    const pageHighlights=savedHighlights.filter((item)=>item.type==="pdf" &&
+      item.pageNumber &&
+      item.text);
+    pageHighlights.forEach((item,index)=>{
+      const startIndex=fullText.indexOf(item.text);
+      if(startIndex===-1) return;
+      const endIndex=startIndex+item.text.length;
+      const startEntry=textNodes.find((entry)=>startIndex>=entry.start &&
+        startIndex<entry.start+entry.node.textContent.length);
+      const endEntry=textNodes.find((entry)=>endIndex>entry.start && 
+        endIndex<=entry.start+entry.node.textContent.length);
+      if(!startEntry||!endEntry) return;
+      const range=document.createRange();
+      range.setStart(startEntry.node,startIndex-startEntry.start);
+      range.setEnd(endEntry.node,endIndex-endEntry.start);
+      const highlightName=`pdf-saved-${pageNumber}-${index}`;
+      window.CSS.highlights.set(highlightName,new window.Highlight(range));
+      let style=document.getElementById("pdf-saved-highlights-style");
+      if(!style){
+        style=document.createElement("style");
+        style.id="pdf-saved-highlights-style";
+        document.head.appendChild(style);
+      }
+      style.textContent+=`::highlight(${highlightName}){
+      background-color:${item.color};
+      color:#000000;}`;
+    });
+};
   return(
     <div style={{width:"100%",
       display:"flex",
@@ -195,7 +266,8 @@ function PDFViewer({fileUrl,readerTheme,readerThemes,book,setHighlights,
         error={<p>Unable to load this PDF!</p>}>
           <Page pageNumber={pageNumber}
           renderTextLayer={true}
-          renderAnnotationLayer={true}/>
+          renderAnnotationLayer={true}
+          onRenderTextLayerSuccess={restorePdfHighlights}/>
         </Document>
       </div>
     </div>
