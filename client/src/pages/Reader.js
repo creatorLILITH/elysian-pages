@@ -402,7 +402,15 @@ return (
 
         {/* PDF VIEWER */}
         {isPDF && (
-          <PDFViewer fileUrl={fileUrl} />
+          <PDFViewer fileUrl={fileUrl} 
+          readerTheme={readerTheme}
+          readerThemes={readerThemes}
+          book={book}
+          setHighlights={setHighlights}
+          onDictionaryOpen={(word)=>{
+            setDictionaryWord(word);
+            setShowDictionary(true);
+          }}/>
         )}
 
         {/* EPUB VIEWER */}
