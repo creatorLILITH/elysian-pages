@@ -71,7 +71,7 @@ function Reader() {
       const word=dictionaryWord.trim().split(/\s+/)[0];
       try{
         setDictionaryData(null);
-        const response= await fetch(`http://localhost:5000/dictionary/${encodeURIComponent(word)}`);
+        const response= await fetch(`https://elysian-pages.onrender.com/dictionary/${encodeURIComponent(word)}`);
         if (!response.ok){
           throw new Error("Word Not Found");
         }
@@ -227,6 +227,7 @@ function Reader() {
 
   }
 
+
   /* FILE URL */
 
   const rawUrl =
@@ -235,16 +236,36 @@ function Reader() {
     book.fileUrl;
 
   const fileUrl = rawUrl
-  ? (rawUrl.startsWith("http")
-  ? rawUrl
-  :`https://elysian-pages.onrender.com/${rawUrl.replaceAll("\\","/")}`)
-  : "";
+    ? rawUrl.startsWith("http")
+      ? rawUrl
+      : `https://elysian-pages.onrender.com/${rawUrl.replaceAll("\\", "/")}`
+    : "";
+
+  // Prefer the explicit file type supplied by the backend.
+  // Fall back to the URL pathname for existing public-library books.
+  const declaredFileType = (
+    book.file_type ||
+    book.fileType ||
+    ""
+  ).toLowerCase();
+
+  let filePath = fileUrl;
+
+  try {
+    if (fileUrl) {
+      filePath = new URL(fileUrl).pathname.toLowerCase();
+    }
+  } catch {
+    filePath = fileUrl.split("?")[0].toLowerCase();
+  }
 
   const isPDF =
-    fileUrl?.toLowerCase().endsWith(".pdf");
+    declaredFileType === "pdf" ||
+    (!declaredFileType && filePath.endsWith(".pdf"));
 
   const isEPUB =
-    fileUrl?.toLowerCase().endsWith(".epub");
+    declaredFileType === "epub" ||
+    (!declaredFileType && filePath.endsWith(".epub"));
 
   /* ADD BOOKMARK */
 

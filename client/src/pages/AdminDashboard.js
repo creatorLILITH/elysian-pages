@@ -68,14 +68,18 @@ function AdminDashboard() {
       {
         method:"DELETE",
       });
-      if (res.ok){
-        fetchBooks();
-      }else{
-        alert("Failed to delete book");
+      const result=await res.json().catch(()=>({}));
+      if(!res.ok){
+        console.error("Public book deletion failed:",result);
+        alert(result.message||result.error||"Failed to delete book.");
+        return;
       }
-    }catch (error){
-      console.error(error);
-      alert("Something went wrong");
+      await fetchBooks();
+      alert("Book deleted successfully.");
+    }
+    catch(error){
+      console.error("Public book deletion error:",error);
+      alert("Could not contact the server. Please try again.");
     }
   };
   useEffect(()=>{

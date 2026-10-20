@@ -81,7 +81,7 @@ function EPUBViewer({
       const word=selectedText.trim().split(/\s+/)[0];
       try{
         setDictionaryData(null);
-        const response=await fetch(`http://localhost:5000/dictionary/${encodeURIComponent(word)}`);
+        const response=await fetch(`https://elysian-pages.onrender.com/dictionary/${encodeURIComponent(word)}`);
         if(!response.ok){
           throw new Error("Word not found");
         }
@@ -257,6 +257,7 @@ useEffect(() => {
         url={fileUrl}
         readerStyles={readerStyles}
         epubViewStyles={epubViewStyles}
+        epubInitOptions={{ openAs:"epub"}}
         location={locationState}
         locationChanged={(epubcifi) => {
   setLocationState(epubcifi);
