@@ -11,7 +11,7 @@ function MyLibrary() {
   const [isUploadExpanded, setIsUploadExpanded]=useState(false);
 
   // Existing books saved from the public library.
-  const [myBooks] = useState(() => {
+  const [myBooks,setMyBooks] = useState(() => {
     try {
       const savedBooks = JSON.parse(
         localStorage.getItem("myLibrary") || "[]"
@@ -299,6 +299,16 @@ function MyLibrary() {
     });
   };
 
+  const handleRemovePublicBook=(book)=>{
+    const confirmed=window.confirm(
+      `Remove "${book.title}" from My Library? The public book will remain avaliable to everyone.`
+    );
+    if (!confirmed) return;
+    const updatedBooks=myBooks.filter((item)=>item.id !== book.id);
+    setMyBooks(updatedBooks);
+    localStorage.setItem("myLibrary",JSON.stringify(updatedBooks));
+  };
+
   return (
     <div style={pageStyle}>
       <main style={mainStyle}>
@@ -359,7 +369,18 @@ function MyLibrary() {
                   key={book.id || `${book.title}-${index}`}
                   style={bookCard}
                 >
-                  <div style={bookIcon}>📖</div>
+                  {book.cover_url?(
+                    <img src={book.cover_url.startsWith("http")
+                      ? book.cover_url:
+                      `https://elysian-pages.onrender.com/${book.cover_url}`}
+                      alt={`Cover of ${book.title||"Untitled Book"}`}
+                      style={publicBookCoverStyle}
+                      onError={(event)=>{
+                        event.currentTarget.style.display="none";
+                      }}/>
+                  ):(
+                    <div style={bookIcon}>Cover</div>
+                  )}
                   <h3 style={bookTitleStyle}>
                     {book.title || "Untitled Book"}
                   </h3>
@@ -374,6 +395,11 @@ function MyLibrary() {
                     onClick={() => handleReadPublicBook(book)}
                   >
                     Read Book
+                  </button>
+                  <button type="button"
+                  style={deleteButtonStyle}
+                  onClick={()=>handleRemovePublicBook(book)}>
+                    Remove from My Library
                   </button>
                 </article>
               ))}
@@ -617,6 +643,13 @@ const bookCard = {
 const bookIcon = {
   fontSize: "48px",
   marginBottom: "14px",
+};
+const publicBookCoverStyle={
+  width:"120px",
+  height:"170px",
+  objectFit:"cover",
+  borderRadius:"12px",
+  marginBottom:"14px",
 };
 const bookTitleStyle = {
   color: "#fff2dd",
