@@ -1,0 +1,12 @@
+.profile-page{
+    min-height:100vh;
+    background:#2b1d0e;
+    color:#f8e7c7;
+    font-family:Georgia,serif;
+    padding:50px 24px;
+    box-sizing:border-box;
+}
+.profile-container{
+    max-width:1100px;
+    margin:0 auto;
+}
