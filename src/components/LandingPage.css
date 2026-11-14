@@ -1,0 +1,224 @@
+/* Landing page — editorial composition on top of the global design system.
+   All colour, type, spacing and depth come from tokens in globals.css. */
+
+.landing {
+  min-height: 100vh;
+}
+
+.landing__nav {
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+/* ---------------------------------------------------------------- Hero ---- */
+
+.landing__hero {
+  background: linear-gradient(180deg, var(--bg-elev) 0%, var(--bg) 100%);
+}
+
+.landing__headline {
+  max-width: 20ch;
+  margin-bottom: var(--s-6);
+}
+
+.landing__lede {
+  max-width: 46ch;
+}
+
+.landing__cta {
+  padding-inline: var(--s-6);
+}
+
+.landing__cta-arrow {
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.landing__cta:hover .landing__cta-arrow {
+  transform: translateX(3px);
+}
+
+/* ------------------------------------------------------------ Features ---- */
+
+.landing__features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--s-6);
+  padding-top: var(--s-16);
+}
+
+.landing__feature {
+  gap: var(--s-4);
+  padding: var(--s-7);
+  background: var(--surface);
+}
+
+@media (hover: hover) {
+  .landing__feature:hover {
+    transform: translateY(-4px);
+    border-color: var(--line-gold);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.landing__feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid var(--line-gold);
+  border-radius: var(--r-md);
+  background: var(--accent-ring);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+/* -------------------------------------------------------------- Band ------ */
+
+.landing__band {
+  position: relative;
+  height: clamp(260px, 46vw, 520px);
+  margin-top: var(--s-16);
+  overflow: hidden;
+  border-block: 1px solid var(--line);
+}
+
+.landing__band-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  filter: saturate(0.82) contrast(1.04) brightness(0.9);
+}
+
+.landing__band-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      180deg,
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 30%, transparent) 30%,
+      color-mix(in srgb, var(--bg) 30%, transparent) 70%,
+      var(--bg) 100%
+    ),
+    radial-gradient(
+      70% 60% at 50% 50%,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      transparent 70%
+    );
+}
+
+/* ------------------------------------------------------------- Quote ----- */
+
+.landing__quote-wrap {
+  padding-block: clamp(var(--s-16), 10vw, var(--s-24));
+  text-align: center;
+}
+
+.landing__quote {
+  margin: 0 auto;
+  max-width: 26ch;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.75rem, 4.2vw, 3.25rem);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  color: var(--accent-soft);
+  text-wrap: balance;
+}
+
+/* --------------------------------------------------------------- CTA ----- */
+
+.landing__cta-section {
+  padding-bottom: clamp(var(--s-16), 12vw, var(--s-24));
+}
+
+.landing__cta-panel {
+  padding: clamp(var(--s-8), 6vw, var(--s-16));
+  border-radius: var(--r-2xl);
+  text-align: center;
+  background:
+    radial-gradient(
+      620px 320px at 50% 0%,
+      var(--ambient-1),
+      transparent 70%
+    ),
+    var(--glass-bg);
+}
+
+.landing__cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  margin-top: var(--s-8);
+}
+
+@media (max-width: 640px) {
+  .landing__band {
+    height: 220px;
+  }
+}
+
+/* A typographic opening with a photographic editorial plate. */
+.landing__hero { min-height:640px; }
+.landing__hero .container { max-width:1440px; padding-inline:clamp(24px,6vw,88px); }
+.landing__hero .hero__inner { max-width:62%; padding-block:110px 120px; }
+.landing__headline { font-size:clamp(64px,7.5vw,112px); line-height:.98; letter-spacing:-.035em; }
+.landing__headline em { color:var(--accent-soft); font-weight:400; }
+.landing__art { position:absolute; right:5%; top:12%; bottom:12%; width:36%; overflow:hidden; border-radius:48% 48% 3px 3px; background:#253c35; }
+.landing__art img { width:100%; height:100%; object-fit:cover; }
+.landing__art-caption { position:absolute; bottom:24px; left:0; width:100%; text-align:center; color:#fff7e5; font:italic 24px Georgia,serif; text-shadow:0 2px 8px #000; }
+.landing__hero .hero__scrim { display:none; }
+.landing__features { gap:0; padding-block:56px; }
+.landing__feature { border:0; border-right:1px solid var(--line); border-radius:0; background:transparent; padding:16px 32px; }
+.landing__feature:last-child { border-right:0; }
+.landing__feature-icon { border:0; background:transparent; justify-content:flex-start; font:italic 30px var(--font-display),Georgia,serif; color:var(--accent-hi); }
+.landing__feature h3 { font-family:var(--font-display),Georgia,serif; font-size:28px; }
+.landing__footer { display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; padding-block:28px; border-top:1px solid var(--line); }
+@media(max-width:760px) {
+ .landing__hero .hero__inner { max-width:100%; padding-block:64px 40px; }
+ .landing__headline { font-size:clamp(58px,12vw,82px); }
+ .landing__art { position:relative; width:calc(100% - 48px); height:300px; inset:auto; margin:0 24px 32px; border-radius:4px; }
+ .landing__hero { display:flex; flex-direction:column; min-height:0; }
+ .landing__hero .container { order:-1; }
+ .landing__feature { border-right:0; border-bottom:1px solid var(--line); padding:24px 0; }
+}
+
+
+/* Public entrance follows the same warm, modern workspace language. */
+.landing__nav { background:var(--bg); border:0; padding-block:24px; }
+.landing__nav .nav__name { font:500 22px var(--font-sans),sans-serif; letter-spacing:-1px; }
+.landing__hero { background:var(--bg); min-height:580px; border:0; }
+.landing__hero .hero__inner { padding-block:90px; }
+.landing__headline { font-size:clamp(48px,6.5vw,88px); line-height:1.08; font-weight:400; letter-spacing:-.065em; }
+.landing__headline em { color:var(--text); font-style:normal; }
+.landing__art { border-radius:12px; top:8%; bottom:8%; width:35%; transform:rotate(3deg); }
+.landing__art-caption { font:400 17px var(--font-sans),sans-serif; }
+.landing__lede { font-size:15px; line-height:1.9; max-width:40ch; }
+.landing__feature h3 { font:500 21px var(--font-sans),sans-serif; letter-spacing:-.04em; }
+.landing__feature p { font-size:13px; line-height:1.9; }
+.landing__feature-icon { color:var(--rose); font:400 14px var(--font-sans),sans-serif; }
+.landing__quote { color:var(--text); font:400 clamp(28px,4vw,48px)/1.35 var(--font-sans),sans-serif; letter-spacing:-.05em; }
+.landing__band { height:320px; margin:40px 24px 0; border-radius:12px; }
+.landing__band-scrim { background:transparent; }
+.landing__cta-panel { background:var(--surface); border:0; }
+@media(max-width:760px) {
+ .landing__hero .hero__inner { padding-block:40px; }
+ .landing__art { width:calc(100% - 48px); transform:none; height:260px; }
+ .landing__nav .nav__name { display:block; font-size:18px; }
+ .landing__nav .nav__links { width:auto; order:initial; }
+ .landing__nav { flex-wrap:wrap; padding-inline:24px; }
+ .landing__features { grid-template-columns:1fr; }
+}
+@media(max-width:480px) {
+ .landing__nav { flex-wrap:nowrap; gap:8px; padding:20px 16px; }
+ .landing__nav .nav__brand { gap:6px; }
+ .landing__nav .nav__name { font-size:15px; }
+ .landing__mark { width:26px; height:26px; }
+ .landing__nav .nav__links { gap:0; flex-shrink:0; }
+ .landing__nav .nav__link { padding:8px; font-size:12px; }
+ .landing__nav .btn--sm { padding:10px 14px; font-size:12px; }
+ .landing__nav .nav__actions { margin:0; }
+ .landing__nav .theme-toggle { width:32px; min-width:32px; padding:0; }
+}

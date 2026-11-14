@@ -1,0 +1,4 @@
+# Local environment files must never be included in deployment source uploads.
+# Supply deployment configuration through Vercel project environment variables.
+.env*
+**/.env*
